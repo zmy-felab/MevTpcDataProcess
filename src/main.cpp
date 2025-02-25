@@ -22,6 +22,7 @@ int main()
 
 	// plot(plot_data_dictionary,"TPC_FEE_range_0_shape_7_gain_0_thre_32_chn_0_ampl_700mV_gain_cali_FE1_20250220144412_0.root", 1);
 
+    std::cout << "hello world" << std::endl;
+    
     return 0;
-
 }

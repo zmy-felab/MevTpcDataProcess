@@ -1,0 +1,3 @@
+/data/home/zhaomy/MevTpcDataProcess/build/CMakeFiles/MevTpcDataProcessLinux.dir
+/data/home/zhaomy/MevTpcDataProcess/build/CMakeFiles/edit_cache.dir
+/data/home/zhaomy/MevTpcDataProcess/build/CMakeFiles/rebuild_cache.dir

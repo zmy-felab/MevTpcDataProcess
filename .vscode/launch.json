@@ -1,0 +1,38 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Debug",
+        "type": "cppdbg",
+        "request": "launch",
+        "args": [],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}",
+        "environment": [],
+        "externalConsole": false,
+        "linux": {
+          "MIMode": "gdb",
+          "miDebuggerPath": "gdb",
+          "environment": [
+            {
+              "name": "DISPLAY",
+              "value": ":114.214.163.180:0.0"
+            }
+          ],
+          "program": "${workspaceFolder}/build/MevTpcDataProcessLinux"
+        },
+        "osx": {
+          "MIMode": "lldb",
+          "miDebuggerPath": "lldb-mi",
+          "program": "${workspaceFolder}/output/main"
+        },
+        "windows": {
+          "MIMode": "gdb",
+          "miDebuggerPath": "gdb.exe",
+          "program": "${workspaceFolder}/output/main.exe"
+        },
+        "preLaunchTask": "build"
+  
+      }
+    ]
+  }

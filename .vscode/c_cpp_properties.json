@@ -1,0 +1,29 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+          "browse": {
+            "path": [
+              "${workspaceFolder}/src",
+              "${workspaceFolder}/include",
+              "/opt/root/v6-28-04/include",
+              "/opt/root/v6-28-04/lib"
+            ],
+            "limitSymbolsToIncludedHeaders": true
+          },
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/include",
+                "${workspaceFolder}/src",
+                "/opt/root/v6-28-04/include"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64",
+            "configurationProvider": "ms-vscode.cmake-tools"
+        }
+    ],
+    "version": 4
+}
