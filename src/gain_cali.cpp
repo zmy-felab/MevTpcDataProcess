@@ -1,6 +1,7 @@
 // created: 2025/02/09 by Zhao Maoyuan
 
 #include "my_lib.hpp"
+#include "plot.hpp"
 #include "gain_cali.hpp"
 
 // Get gain of each channel

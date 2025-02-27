@@ -7,7 +7,7 @@
 constexpr auto baseline_average_length = 10;
 
 // find strip_x¡¢strip_y by FE_ID and CH_ID
-void ch_to_strip(Int_t czt_lookup[], Int_t FE_ID, Int_t CH_ID, Int_t& strip_xy, Int_t& strip_id)
+void ch_to_strip(std::vector<Int_t> czt_lookup, Int_t FE_ID, Int_t CH_ID, Int_t& strip_xy, Int_t& strip_id)
 {
     if (FE_ID <= 7) {
         strip_xy = 0;
@@ -86,11 +86,15 @@ void info_calculate(std::string test_data_dictionary, std::string Q_calculate_op
     // define the Intermediate variable
     std::string* root_filename = new std::string[file_num];
     std::string* event_filename = new std::string[file_num];
-    Int_t czt_lookup[1024];
-    for (Int_t i = 0; i < 512; i++) {
-        czt_lookup[i] = i;
-        czt_lookup[512 + i] = i;
-    }
+	std::vector<Int_t> czt_lookup;
+	for (Int_t i = 0; i < 1024; i++) {
+		if (i < 512) {
+			czt_lookup.push_back(i);
+		}
+		else {
+			czt_lookup.push_back(i - 512);
+		}
+	}
 
     for (Int_t file_index = 0; file_index < file_num; file_index++)
     {
@@ -145,7 +149,7 @@ void info_calculate(std::string test_data_dictionary, std::string Q_calculate_op
         event_tree->Branch("strip_timing", event_data_object.strip_timing, "event_data_object.strip_timing[event_data_object.strip_num]/D");
 
         // define the Intermediate variable
-        Double_t ADC_data_sub_baseline[wave_length];
+        Double_t *ADC_data_sub_baseline = new Double_t[wave_length];
         Double_t strip_baseline = 0;
         Double_t strip_timing = 0;
         Double_t ADC_data_max = 0;
@@ -230,12 +234,20 @@ void info_calculate(std::string test_data_dictionary, std::string Q_calculate_op
             event_data_object.strip_timing[event_data_object.strip_num] = strip_timing;
             event_data_object.strip_num ++;
 
+			if (event_data_object.strip_num >= channel_num)
+			{   
+                event_data_object.strip_num = 0;
+                event_data_object.event_id = -1;
+			}
+
             if (pulse_id % 10000 == 0)
             {
                 std::cout << "Processed: " << pulse_id * 100 / pulse_entries << "%" << std::endl;
             }
         }
 
+		delete[] ADC_data_sub_baseline;
+		
         // Close the file
         fp->Close();
         std::cout << "Have closed the file:" << root_filename[file_index] << std::endl << "\n" << std::endl;
@@ -253,4 +265,6 @@ void info_calculate(std::string test_data_dictionary, std::string Q_calculate_op
 
 	delete[] root_filename;
 	delete[] event_filename;
+    delete[] gain;
+    delete[] intercept;
 }

@@ -1,6 +1,56 @@
 // created: 2025/02/19 by Zhao Maoyuan
 
+#include "my_lib.hpp"
 #include "plot.hpp"
+
+// function of fit
+Double_t fitf(Double_t* x, Double_t* par)
+{
+    return par[0] * x[0] + par[1];
+}
+
+// linear fit of amplitude
+void linearFit(std::vector<Double_t> xdata, std::vector<Double_t> ydata, Int_t N, Double_t(&par)[2])
+{
+    Double_t* x_data = new Double_t[N];
+    Double_t* y_data = new Double_t[N];
+
+    for (Int_t i = 0; i < N; i++)
+    {
+        x_data[i] = xdata[i];
+        y_data[i] = ydata[i];
+    }
+
+    // fit
+    // TF1* func = new TF1("<name>", <function>, MinX,MaxX, nPar);
+    TF1* func = new TF1("func", fitf, 1, 10, 2);
+    func->SetParameters(0, 0);
+    func->SetParNames("Gain", "Intercept");
+    TGraph* gr1 = new TGraph(N, x_data, y_data);
+    gr1->Fit("func");
+    func->GetParameters(par);
+    delete gr1;
+}
+
+void draw_histogram(Double_t* data, Int_t size, std::string fig_name) {
+
+    TCanvas* c1 = new TCanvas("c1", "Histogram", 800, 600);
+    TH1D* h1 = new TH1D("h1", "Data Distribution", 1000, 0, 1000);
+
+    for (Int_t i = 0; i < size; ++i) {
+        h1->Fill(data[i]);
+    }
+
+    c1->cd();
+    h1->Draw();
+
+    c1->Update();
+    c1->SaveAs(fig_name.c_str());
+
+    delete c1;
+    delete h1;
+
+}
 
 // Import the data of the baseline test for DC correction and output the DC correction file
 void plot(std::string plot_data_dictionary, std::string root_file_name, Int_t N)
