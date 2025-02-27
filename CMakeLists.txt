@@ -3,7 +3,7 @@
 
 cmake_minimum_required (VERSION 3.10)
 
-project ("MevTpcDataProcessLinux")
+project ("MevTpcDataProcess")
 
 set(CMAKE_BUILD_TYPE Debug)
 

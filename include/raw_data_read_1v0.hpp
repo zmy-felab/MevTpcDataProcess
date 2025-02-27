@@ -1,6 +1,9 @@
 #pragma once
 
-#include "main.hpp"
+#ifndef _RAW_DATA_READ_1V0_
+#define _RAW_DATA_READ_1V0_
 
-std::vector<std::string> get_file_names(const std::string& directory);
-void raw_data_read_1v0(std::string test_data_dictionary);
+#include "system.hpp"
+
+void raw_data_read_1v0(std::string data_dictionary, std::string ADC_code_corr_option, std::string ADC_code_cali_data_dictionary);
+#endif

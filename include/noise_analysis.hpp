@@ -1,6 +1,11 @@
 #pragma once
-#include "main.hpp"
+
+#ifndef _NOISE_ANALYSIS_
+#define _NOISE_ANALYSIS_
+
+#include "system.hpp"
 
 void noise_analysis(std::string noise_data_dictionary);
-Double_t calculate_RMS(std::vector<Double_t> waveform);
-Double_t get_average(std::vector<Double_t> waveform);
+
+#endif
+

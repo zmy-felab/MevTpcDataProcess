@@ -1,8 +1,8 @@
-#ifndef _my_class_h
-#define _my_class_h
+#ifndef _MY_CLASS_
+#define _MY_CLASS_
 
-#include "../include/RtypesCore.h"
-#include "main.hpp"
+#include "system.hpp"
+#include "my_const.hpp"
 
 class pulse_data
 {
@@ -21,7 +21,7 @@ public:
     Int_t Stop;
     Long64_t Time_Stamp;
     Long64_t Event_Num;
-    Int_t ADC_Data[wave_length];
+    Double_t ADC_Data[wave_length];
 };
 
 class event_data
@@ -36,6 +36,7 @@ public:
     Int_t strip_id[channel_num];
     Int_t event_id;
     Double_t strip_amplitude[channel_num];
+	Double_t strip_Q[channel_num];
     Double_t strip_timing[channel_num];
 };
 

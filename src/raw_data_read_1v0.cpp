@@ -1,30 +1,38 @@
 // created: 2023/08/01 by qyh
 // modified: 2025/01/31 by Zhao Maoyuan
 
+#include "my_lib.hpp"
+#include "ADC_code_correct.hpp"
 #include "raw_data_read_1v0.hpp"
 
-// Get file names in a folder.
-std::vector<std::string> get_file_names(const std::string& directory) {
-    std::vector<std::string> file_names;
-    for (const auto & entry : std::filesystem::directory_iterator(directory)) {
-        if (entry.is_regular_file()) {
-            file_names.push_back(entry.path().filename().string());
-        }
-    }
-    return file_names;
-}
-
 // Read .dat files to .root files
-void raw_data_read_1v0(std::string test_data_dictionary)
-{
+void raw_data_read_1v0(std::string data_dictionary, std::string ADC_code_corr_option, std::string ADC_code_cali_data_dictionary)
+{   
+    // load correct_cali file
+    Double_t(*ADC_data_corr)[wave_length] = new Double_t[channel_num][wave_length]();
+    if (ADC_code_corr_option == "ADC_code_calibration")
+    {
+        std::cout << "Start ADC code calibration" << std::endl;
+    }
+    else if (ADC_code_corr_option == "ADC_code_correction")
+    {
+        std::string cali_file = ADC_code_cali_data_dictionary + "correct_cali.txt";
+        corr_cali_input(cali_file, ADC_data_corr);
+    }
+    else
+    {
+        std::cout << "Error: The ADC_code_corr_option is not set correctly!" << std::endl;
+        exit(1);
+    }
+
     // Set data path
-	std::string raw_data_dictionary = test_data_dictionary + "raw_data/";
-	std::string root_data_dictionary = test_data_dictionary + "root_data/";
+	std::string raw_data_dictionary = data_dictionary + "raw_data/";
+	std::string root_data_dictionary = data_dictionary + "root_data/";
 
     // pop warnings if path is not set
-    if (access(test_data_dictionary.c_str(), 0) == -1)
+    if (access(data_dictionary.c_str(), 0) == -1)
     {
-        std::cout << "Path: " << test_data_dictionary << " is not set!" << std::endl << "\n" << std::endl;
+        std::cout << "Path: " << data_dictionary << " is not set!" << std::endl << "\n" << std::endl;
         exit(1);
     }
 
@@ -39,7 +47,12 @@ void raw_data_read_1v0(std::string test_data_dictionary)
     // create the folders if not exist
     if (access(root_data_dictionary.c_str(), 0) == -1)
     {
-        mkdir(root_data_dictionary.c_str(),0777);
+        #if defined(_WIN32)
+            mkdir(root_data_dictionary.c_str());
+        #else
+		    mkdir(root_data_dictionary.c_str(), 777);
+        #endif
+
         std::cout << "The path " << root_data_dictionary << " does not exist. Creating..." << std::endl << "\n" << std::endl;
     }
 
@@ -95,7 +108,6 @@ void raw_data_read_1v0(std::string test_data_dictionary)
         Char_t buf_adc[2] = {0};
         Char_t buf_time[6] = { 0 };
         Char_t buf_eventID[4] = { 0 };
-        UChar_t buf_temp;
         ULong64_t time_stamp = 0;
         ULong64_t time_stamp_temp = 0;
         Int_t event_num = 0;
@@ -116,7 +128,7 @@ void raw_data_read_1v0(std::string test_data_dictionary)
         raw_tree->Branch("CH_ID", &pulse.CH_ID, "CH_ID/I");
         raw_tree->Branch("Time_Stamp", &pulse.Time_Stamp, "Time_Stamp/L");
         raw_tree->Branch("Event_Num", &pulse.Event_Num, "Event_Num/L");
-        raw_tree->Branch("ADC_Data", pulse.ADC_Data, "ADC_Data[128]/I");
+        raw_tree->Branch("ADC_Data", pulse.ADC_Data, "ADC_Data[128]/D");
 
         while(1)
         {
@@ -163,7 +175,20 @@ void raw_data_read_1v0(std::string test_data_dictionary)
                 for (int j = 0; j < 128; j++)
                 {
                     fin.read(buf_adc, sizeof(buf_adc));
-                    pulse.ADC_Data[j] = ((int)(unsigned char)buf_adc[0] << 8) + ((int)(unsigned char)buf_adc[1]);
+                    pulse.ADC_Data[j] = (Double_t)(((int)(unsigned char)buf_adc[0] << 8) + ((int)(unsigned char)buf_adc[1]));
+                }
+
+                if (ADC_code_corr_option == "ADC_code_calibration")
+                {
+                }
+                else if (ADC_code_corr_option == "ADC_code_correction")
+                {   
+                    ADC_code_correct(pulse.ADC_Data, pulse.Stop, ADC_data_corr[pulse.FE_ID * 64 + pulse.CH_ID]);
+				}
+                else
+                {
+                    std::cout << "Error: The ADC_code_corr_option is not set correctly!" << std::endl;
+                    exit(1);
                 }
 
                 fin.read(buf_time, sizeof(buf_time));
@@ -198,4 +223,5 @@ void raw_data_read_1v0(std::string test_data_dictionary)
         delete fp;
     }
     delete[] root_filename;
+    delete[] *ADC_data_corr;
 }   

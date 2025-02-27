@@ -5,7 +5,7 @@
 // Import the data of the baseline test for DC correction and output the DC correction file
 void plot(std::string plot_data_dictionary, std::string root_file_name, Int_t N)
 {	
-    raw_data_read_1v0(plot_data_dictionary);
+    // raw_data_read_1v0(plot_data_dictionary);
 
     // Open the root file
 	std::string file_name = plot_data_dictionary + "root_data/" + root_file_name;

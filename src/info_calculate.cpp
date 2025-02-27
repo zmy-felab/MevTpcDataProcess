@@ -1,10 +1,12 @@
 // created: 2025/02/01 by Zhao Maoyuan
 
+#include "my_lib.hpp"
+#include "Q_calculate.hpp"
 #include "info_calculate.hpp"
 
 constexpr auto baseline_average_length = 10;
 
-// find strip_xï¿½ï¿½strip_y by FE_ID and CH_ID
+// find strip_x¡¢strip_y by FE_ID and CH_ID
 void ch_to_strip(Int_t czt_lookup[], Int_t FE_ID, Int_t CH_ID, Int_t& strip_xy, Int_t& strip_id)
 {
     if (FE_ID <= 7) {
@@ -27,8 +29,27 @@ void ch_to_strip(Int_t czt_lookup[], Int_t FE_ID, Int_t CH_ID, Int_t& strip_xy, 
 }
 
 // calculate event information
-void info_calculate(std::string test_data_dictionary)
+void info_calculate(std::string test_data_dictionary, std::string Q_calculate_option, std::string gain_cali_dictionary)
 {   
+    // load gain.txt
+    Double_t* gain = new Double_t[channel_num];
+    Double_t* intercept = new Double_t[channel_num];
+    std::string cali_file = gain_cali_dictionary + "gain.txt";
+
+	if (Q_calculate_option == "Q_calculate")
+	{
+        gain_input(cali_file, gain, intercept);
+	}
+    else if (Q_calculate_option == "gain_cali")
+    {
+
+    }
+	else
+	{
+		std::cout << "error: Q_calculate_option can not be " << Q_calculate_option << "!" << std::endl;
+		exit(1);
+	}
+
     // Set data path
 	std::string root_data_dictionary = test_data_dictionary + "root_data/";
 	std::string event_data_dictionary = test_data_dictionary + "event_data/";
@@ -42,13 +63,14 @@ void info_calculate(std::string test_data_dictionary)
         exit(1);
     }
 
-    // read raw data to root data
-    raw_data_read_1v0(test_data_dictionary);
-
     // create the folders if not exist
     if (access(event_data_dictionary.c_str(), 0) == -1)
-    {
-        mkdir(event_data_dictionary.c_str(), 0777);
+    {   
+        #if defined(_WIN32)
+            mkdir(event_data_dictionary.c_str());
+        #else
+            mkdir(root_data_dictionary.c_str(), 777);
+        #endif
         std::cout << "The path " << event_data_dictionary << " does not exist. Creating..." << std::endl << "\n" << std::endl;
     }
 
@@ -60,11 +82,6 @@ void info_calculate(std::string test_data_dictionary)
         std::cout << "There is no .root files in the path: " << root_data_dictionary << std::endl;
         exit(1);
     }
-
-    // load correct_cali file
-    std::string cali_file = test_data_dictionary + "../correct_cali_data/correct_cali.txt";
-    Double_t(*ADC_data_corr)[wave_length] = new Double_t[channel_num][wave_length]();
-    corr_cali_input(cali_file, ADC_data_corr);
 
     // define the Intermediate variable
     std::string* root_filename = new std::string[file_num];
@@ -124,6 +141,7 @@ void info_calculate(std::string test_data_dictionary)
         event_tree->Branch("strip_id", event_data_object.strip_id, "event_data_object.strip_id[event_data_object.strip_num]/I");
         event_tree->Branch("event_id", &event_data_object.event_id, "event_data_object.event_id/I");
         event_tree->Branch("strip_amplitude", event_data_object.strip_amplitude, "event_data_object.strip_amplitude[event_data_object.strip_num]/D");
+		event_tree->Branch("strip_Q", event_data_object.strip_Q, "event_data_object.strip_Q[event_data_object.strip_num]/D");
         event_tree->Branch("strip_timing", event_data_object.strip_timing, "event_data_object.strip_timing[event_data_object.strip_num]/D");
 
         // define the Intermediate variable
@@ -151,23 +169,23 @@ void info_calculate(std::string test_data_dictionary)
             }
 
             // calculate event xy imformation
-            event_data_object.FE_ID[event_data_object.strip_num] = pulse.FE_ID;
-            event_data_object.CH_ID[event_data_object.strip_num] = pulse.CH_ID;
-            ch_to_strip(czt_lookup, pulse.FE_ID, pulse.CH_ID, event_data_object.strip_xy[event_data_object.strip_num], event_data_object.strip_id[event_data_object.strip_num]);
-            
-            // ADC code correction
-			Double_t ADC_data_double[wave_length];
-			for (Int_t i = 0; i < wave_length; i++)
+            if (pulse.FE_ID <= 16 && pulse.FE_ID >= 1 && pulse.CH_ID >= 0 && pulse.CH_ID <= 63)
+            {
+                event_data_object.FE_ID[event_data_object.strip_num] = pulse.FE_ID;
+                event_data_object.CH_ID[event_data_object.strip_num] = pulse.CH_ID;
+            }    
+            else
 			{
-				ADC_data_double[i] = (Double_t)pulse.ADC_Data[i];
+                continue;
 			}
-            data_correct(ADC_data_double, pulse.Stop, ADC_data_corr[pulse.FE_ID * 64 + pulse.CH_ID]);
+
+            ch_to_strip(czt_lookup, pulse.FE_ID, pulse.CH_ID, event_data_object.strip_xy[event_data_object.strip_num], event_data_object.strip_id[event_data_object.strip_num]);
 
             // calculate baseline
             strip_baseline = 0;
             for (Int_t ADC_index = 0; ADC_index < baseline_average_length; ADC_index++)
             {
-                strip_baseline += ADC_data_double[ADC_index];
+                strip_baseline += pulse.ADC_Data[ADC_index];
             }
             strip_baseline = strip_baseline / baseline_average_length;
 
@@ -176,14 +194,28 @@ void info_calculate(std::string test_data_dictionary)
             ADC_data_max_index = 0;
             for (Int_t ADC_index = 0; ADC_index < wave_length; ADC_index++)
             {
-                ADC_data_sub_baseline[ADC_index] = strip_baseline - ADC_data_double[ADC_index];
-                if (ADC_data_max >= ADC_data_sub_baseline[ADC_index])
+                ADC_data_sub_baseline[ADC_index] = strip_baseline - pulse.ADC_Data[ADC_index];
+                if (ADC_data_max <= ADC_data_sub_baseline[ADC_index])
                 {
                     ADC_data_max = ADC_data_sub_baseline[ADC_index];
                     ADC_data_max_index = ADC_index;
                 }
             }
             event_data_object.strip_amplitude[event_data_object.strip_num] = ADC_data_max;
+
+            if (Q_calculate_option == "Q_calculate")
+            {
+                event_data_object.strip_Q[event_data_object.strip_num] = Q_calculate(event_data_object.FE_ID[event_data_object.strip_num], event_data_object.CH_ID[event_data_object.strip_num], gain, intercept, event_data_object.strip_amplitude[event_data_object.strip_num]);
+			}
+			else if(Q_calculate_option == "gain_cali")
+			{
+				event_data_object.strip_Q[event_data_object.strip_num] = 0;
+			}
+            else
+            {
+				std::cout << "error: Q_calculate_option can not be " << Q_calculate_option << "!" << std::endl;
+                exit(1);
+            }
             
             // calculate timing
             strip_timing = 0;
@@ -219,7 +251,6 @@ void info_calculate(std::string test_data_dictionary)
 
     std::cout << "Info calculation has been completed successfully!" << std::endl;
 
-    delete[] * ADC_data_corr;
 	delete[] root_filename;
 	delete[] event_filename;
 }
