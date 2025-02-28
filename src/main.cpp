@@ -32,16 +32,8 @@ int main()
     // noise_analysis(noise_data_dictionary);
 
 	// gain calibration
-	// raw_data_read_1v0(work_dictionary + "gain_cali_data_range_1_gain_16/", "ADC_code_correction", correct_cali_dictionary); // option = "ADC_code_calibration" or "ADC_code_correction"
-	// info_calculate(work_dictionary + "gain_cali_data_range_1_gain_16/", "gain_cali", ""); // option = "gain_cali" or "Q_calculate"
-	// raw_data_read_1v0(work_dictionary + "gain_cali_data_range_1_gain_31/", "ADC_code_correction", correct_cali_dictionary); // option = "ADC_code_calibration" or "ADC_code_correction"
-	// info_calculate(work_dictionary + "gain_cali_data_range_1_gain_31/", "gain_cali", ""); // option = "gain_cali" or "Q_calculate"
-	// raw_data_read_1v0(work_dictionary + "gain_cali_data_range_3_gain_0/", "ADC_code_correction", correct_cali_dictionary); // option = "ADC_code_calibration" or "ADC_code_correction"
-	// info_calculate(work_dictionary + "gain_cali_data_range_3_gain_0/", "gain_cali", ""); // option = "gain_cali" or "Q_calculate"
-	// raw_data_read_1v0(work_dictionary + "gain_cali_data_range_3_gain_16/", "ADC_code_correction", correct_cali_dictionary); // option = "ADC_code_calibration" or "ADC_code_correction"
-	// info_calculate(work_dictionary + "gain_cali_data_range_3_gain_16/", "gain_cali", ""); // option = "gain_cali" or "Q_calculate"
-	// raw_data_read_1v0(work_dictionary + "gain_cali_data_range_3_gain_31/", "ADC_code_correction", correct_cali_dictionary); // option = "ADC_code_calibration" or "ADC_code_correction"
-	// info_calculate(work_dictionary + "gain_cali_data_range_3_gain_31/", "gain_cali", ""); // option = "gain_cali" or "Q_calculate"
+	raw_data_read_1v0(work_dictionary + "gain_cali_data_20250227/", "ADC_code_correction", correct_cali_dictionary); // option = "ADC_code_calibration" or "ADC_code_correction"
+	info_calculate(work_dictionary + "gain_cali_data_20250227/", "gain_cali", ""); // option = "gain_cali" or "Q_calculate"
 	// std::vector<Double_t> Q = {20,30,40,50,60,70,80,90,100,110,120,130,140};
 	// gain_cali(gain_cali_dictionary, Q);
 
