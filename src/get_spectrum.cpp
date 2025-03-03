@@ -110,7 +110,6 @@ void get_Q_spectrum(std::string test_data_dictionary)
     fp2->Close();
     delete fp2;
     std::cout << spec_filename << " has been written!\n" << std::endl;
-
     std::cout << "Spectrum calculation has been completed successfully!" << std::endl;
 }
 
@@ -118,7 +117,7 @@ void get_calibration_spectrum(std::string test_data_dictionary)
 {
     // Set data path
     std::string event_data_dictionary = test_data_dictionary + "event_data/";
-    std::string spec_data_dictionary = test_data_dictionary + "spec_data/";
+    std::string spec_data_dictionary = test_data_dictionary + "cali_spec_data/";
 
     std::cout << "Start getting spectrum with data files at path:" << event_data_dictionary << std::endl << "\n" << std::endl;
 
@@ -212,8 +211,11 @@ void get_calibration_spectrum(std::string test_data_dictionary)
         }
 
         // Draw histogram
-        draw_histogram(amplitude_chip0.data(), amplitude_chip0.size(), spec_data_dictionary + file_names[file_index].substr(0, event_filename[file_index].size() - 5) + "_ch_" + std::to_string(chn_ID) + ".png");
-		draw_histogram(amplitude_chip1.data(), amplitude_chip1.size(), spec_data_dictionary + file_names[file_index].substr(0, event_filename[file_index].size() - 5) + "_ch_" + std::to_string(chn_ID + 32) + ".png");
+        Double_t mean = 0;
+        Double_t sigma = 0;
+        Double_t amplitude = 0;
+        GaussianDraw(amplitude_chip0, mean, sigma, amplitude, spec_data_dictionary + file_names[file_index].substr(0, event_filename[file_index].size() - 5) + "_ch_" + std::to_string(chn_ID) + ".png");
+        GaussianDraw(amplitude_chip1, mean, sigma, amplitude, spec_data_dictionary + file_names[file_index].substr(0, event_filename[file_index].size() - 5) + "_ch_" + std::to_string(chn_ID + 32) + ".png");
 
         // Close the file
         fp->Close();

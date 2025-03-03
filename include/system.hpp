@@ -34,3 +34,5 @@
 #include "TMath.h"
 #include "TRandom.h"
 #include "TROOT.h"
+#include "TLatex.h"
+#include "TPaveText.h"

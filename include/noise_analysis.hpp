@@ -5,7 +5,7 @@
 
 #include "system.hpp"
 
-void noise_analysis(std::string noise_data_dictionary);
+void noise_analysis(std::string noise_data_dictionary, std::string gain_cali_dictionary);
 
 #endif
 

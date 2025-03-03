@@ -1,10 +1,11 @@
 // created: 2025/02/08 by Zhao Maoyuan
 
 #include "my_lib.hpp"
+#include "Q_calculate.hpp"
 #include "noise_analysis.hpp"
 
 // Noise analysis
-void noise_analysis(std::string noise_data_dictionary)
+void noise_analysis(std::string noise_data_dictionary, std::string gain_cali_dictionary)
 {
     // Set data path
     std::string root_data_dictionary = noise_data_dictionary + "root_data/";
@@ -93,6 +94,11 @@ void noise_analysis(std::string noise_data_dictionary)
        
     }
 
+    // load gain and intercept
+    Double_t* gain = new Double_t[channel_num]();
+    Double_t* intercept = new Double_t[channel_num]();
+    gain_input(gain_cali_dictionary + "gain.txt", gain, intercept);
+
     // define tree
     Double_t noise;
     TTree* noise_tree = new TTree("noise_tree", "noise of every channel");
@@ -100,9 +106,11 @@ void noise_analysis(std::string noise_data_dictionary)
 
     // calculate noise
     Double_t noise_RMS[channel_num];
+	Double_t noise_Q_RMS[channel_num];
     for (Int_t i = 0; i < channel_num; i++) {
         noise_RMS[i] = calculate_RMS(noise_data[i]);
-        noise = noise_RMS[i]/4.6;
+        noise_Q_RMS[i] = noise_RMS[i] / gain[i];
+		noise = noise_Q_RMS[i];
         if (!isnan(noise)) {
             noise_tree->Fill();
         }
@@ -121,7 +129,7 @@ void noise_analysis(std::string noise_data_dictionary)
     dataFile.open(noise_data_dictionary + "noise.txt");
     for (Int_t i = 0; i < channel_num; i++)
     {
-        dataFile << std::fixed << std::setprecision(3) << noise_RMS[i] << std::endl << "\n"; 
+        dataFile << (i / 64) << " " << (i % 64) << " " << std::fixed << std::setprecision(3) << noise_Q_RMS[i] << std::endl;
     }
     dataFile.close();
     std::cout << noise_data_dictionary << "noise.txt has been written!\n" << std::endl;
@@ -129,5 +137,7 @@ void noise_analysis(std::string noise_data_dictionary)
     std::cout << "noise analysis has been completed successfully!" << std::endl;
 
     delete[] raw_root_filename;
+    delete[] gain;
+    delete[] intercept;
 
 }

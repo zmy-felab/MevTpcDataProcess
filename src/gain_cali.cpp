@@ -9,6 +9,7 @@ void gain_cali(std::string gain_cali_dictionary, std::vector<Double_t> Q)
 {
     // Set data path
     std::string event_data_dictionary = gain_cali_dictionary + "event_data/";
+    std::string linear_plot_dictionary = gain_cali_dictionary + "linear_plot/";
     std::cout << "Start amplitude calibration with data files at path:" << event_data_dictionary << std::endl << "\n" << std::endl;
 
     // pop warnings if path is not set
@@ -25,6 +26,18 @@ void gain_cali(std::string gain_cali_dictionary, std::vector<Double_t> Q)
     {
         std::cout << "There is no event files in the path: " << event_data_dictionary << std::endl;
         exit(1);
+    }
+
+    // create the folders if not exist
+    if (access(linear_plot_dictionary.c_str(), 0) == -1)
+    {
+        #if defined(_WIN32)
+            mkdir(linear_plot_dictionary.c_str());
+        #else
+		    mkdir(linear_plot_dictionary.c_str(), 777);
+        #endif
+
+        std::cout << "The path " << linear_plot_dictionary << " does not exist. Creating..." << std::endl << "\n" << std::endl;
     }
 
     // define the Intermediate variable
@@ -96,7 +109,7 @@ void gain_cali(std::string gain_cali_dictionary, std::vector<Double_t> Q)
     
     // output gain.txt
     std::ofstream dataFile;
-    dataFile.open(gain_cali_dictionary + "gain.txt"); // ´ò¿ªÎÄ¼ş£¬Èç¹û²»´æÔÚÔò´´½¨
+    dataFile.open(gain_cali_dictionary + "gain.txt"); // æ‰“å¼€æ–‡ä»¶ï¼Œå¦‚æœä¸å­˜åœ¨åˆ™åˆ›å»º
 
     for (Int_t i = 0; i < channel_num; i++)
     {   
@@ -120,15 +133,13 @@ void gain_cali(std::string gain_cali_dictionary, std::vector<Double_t> Q)
             {
                 // linear fit and get parameter
                 Double_t par[2];
-                linearFit(Q, amplitude_average[i], amplitude_average[i].size(), par);
-
-                
-                dataFile << (Int_t)(i / 64) << " " << (i % 64) << " " << par[0] << " " << par[1] << std::endl; // Ğ´ÈëÊı¾İ
+                linearFitDraw(Q, amplitude_average[i], amplitude_average[i].size(), par[0], par[1], linear_plot_dictionary + "FE_" + std::to_string((i / 64)) + "chn_" + std::to_string((i % 64)) + "_gain_cali.png");
+                dataFile << (Int_t)(i / 64) << " " << (i % 64) << " " << par[0] << " " << par[1] << std::endl; // å†™å…¥æ•°æ®
                 
             }            
         }
     }
-    dataFile.close(); // ¹Ø±ÕÎÄ¼ş
+    dataFile.close(); // å…³é—­æ–‡ä»¶
 
     std::cout << "amplitude calibration has been completed successfully!" << std::endl;
 }

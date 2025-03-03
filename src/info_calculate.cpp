@@ -6,7 +6,7 @@
 
 constexpr auto baseline_average_length = 10;
 
-// find strip_x°¢strip_y by FE_ID and CH_ID
+// find strip_x„ÄÅstrip_y by FE_ID and CH_ID
 void ch_to_strip(std::vector<Int_t> czt_lookup, Int_t FE_ID, Int_t CH_ID, Int_t& strip_xy, Int_t& strip_id)
 {
     if (FE_ID <= 7) {
