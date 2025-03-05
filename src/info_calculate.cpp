@@ -69,7 +69,7 @@ void info_calculate(std::string test_data_dictionary, std::string Q_calculate_op
         #if defined(_WIN32)
             mkdir(event_data_dictionary.c_str());
         #else
-            mkdir(root_data_dictionary.c_str(), 777);
+            mkdir(root_data_dictionary.c_str(), 0777);
         #endif
         std::cout << "The path " << event_data_dictionary << " does not exist. Creating..." << std::endl << "\n" << std::endl;
     }

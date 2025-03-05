@@ -24,7 +24,7 @@ void get_Q_spectrum(std::string test_data_dictionary)
         #if defined(_WIN32)
             mkdir(spec_data_dictionary.c_str());
         #else
-            mkdir(spec_data_dictionary.c_str(), 777);
+            mkdir(spec_data_dictionary.c_str(), 0777);
         #endif
         
         std::cout << "The path " << spec_data_dictionary << " does not exist. Creating..." << std::endl << "\n" << std::endl;
@@ -134,7 +134,7 @@ void get_calibration_spectrum(std::string test_data_dictionary)
         #if defined(_WIN32)
             mkdir(spec_data_dictionary.c_str());
         #else
-            mkdir(spec_data_dictionary.c_str(), 777);
+            mkdir(spec_data_dictionary.c_str(), 0777);
         #endif
 
         std::cout << "The path " << spec_data_dictionary << " does not exist. Creating..." << std::endl << "\n" << std::endl;

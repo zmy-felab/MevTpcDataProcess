@@ -25,7 +25,7 @@ void noise_analysis(std::string noise_data_dictionary, std::string gain_cali_dic
         #if defined(_WIN32)
             mkdir(root_data_dictionary.c_str());
         #else
-            mkdir(root_data_dictionary.c_str(), 777);
+            mkdir(root_data_dictionary.c_str(), 0777);
         #endif
         std::cout << "The path " << root_data_dictionary << " does not exist. Creating..." << std::endl << "\n" << std::endl;
     }

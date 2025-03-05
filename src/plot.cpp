@@ -137,7 +137,7 @@ void wavePlot(std::string plot_data_dictionary, std::string root_file_name, Int_
     raw_tree->SetBranchAddress("CH_ID", &pulse.CH_ID);
     raw_tree->SetBranchAddress("ADC_Data", pulse.ADC_Data);
 
-	Double_t ADC_data[10][wave_length];
+	Double_t ADC_data[100][wave_length];
 
     for (Int_t pulse_id = 0; pulse_id < N; pulse_id++)
     {

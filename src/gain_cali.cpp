@@ -34,7 +34,7 @@ void gain_cali(std::string gain_cali_dictionary, std::vector<Double_t> Q)
         #if defined(_WIN32)
             mkdir(linear_plot_dictionary.c_str());
         #else
-		    mkdir(linear_plot_dictionary.c_str(), 777);
+		    mkdir(linear_plot_dictionary.c_str(), 0777);
         #endif
 
         std::cout << "The path " << linear_plot_dictionary << " does not exist. Creating..." << std::endl << "\n" << std::endl;

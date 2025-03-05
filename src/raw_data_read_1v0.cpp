@@ -50,7 +50,7 @@ void raw_data_read_1v0(std::string data_dictionary, std::string ADC_code_corr_op
         #if defined(_WIN32)
             mkdir(root_data_dictionary.c_str());
         #else
-		    mkdir(root_data_dictionary.c_str(), 777);
+		    mkdir(root_data_dictionary.c_str(), 0777);
         #endif
 
         std::cout << "The path " << root_data_dictionary << " does not exist. Creating..." << std::endl << "\n" << std::endl;

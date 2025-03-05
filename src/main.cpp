@@ -16,8 +16,8 @@
 std::string work_dictionary = "G:/MeV/test/data/";
 
 std::string correct_cali_dictionary = work_dictionary + "correct_cali_data/";
-std::string noise_data_dictionary = work_dictionary + "noise_data_range_0_gain_0/";
-std::string gain_cali_dictionary = work_dictionary + "gain_cali_data_range_0_gain_0/";
+std::string noise_data_dictionary = work_dictionary + "20250304_noise_MMs/noise_data_range_0_gain_0_1404/";
+std::string gain_cali_dictionary = work_dictionary + "gain_cali_data_range_0_gain_0_ii_FE2/";
 std::string experiment_data_dictionary = work_dictionary + "experiment_data/";
 std::string plot_data_dictionary = work_dictionary + "plot_data/";
 std::string test_data_dictionary = work_dictionary + "test_data/";
@@ -33,11 +33,11 @@ int main()
     // noise_analysis(noise_data_dictionary, gain_cali_dictionary);
 
 	// gain calibration
-	// raw_data_read_1v0(gain_cali_dictionary, "ADC_code_correction", correct_cali_dictionary); // option = "ADC_code_calibration" or "ADC_code_correction"
-	// info_calculate(gain_cali_dictionary, "gain_cali", ""); // option = "gain_cali" or "Q_calculate"
-	// std::vector<Double_t> Q = {20,30,40,50,60,70,80,90,100,110,120,130,140};
-	// gain_cali(gain_cali_dictionary, Q);
-
+	//raw_data_read_1v0(gain_cali_dictionary, "ADC_code_correction", correct_cali_dictionary); // option = "ADC_code_calibration" or "ADC_code_correction"
+	//info_calculate(gain_cali_dictionary, "gain_cali", ""); // option = "gain_cali" or "Q_calculate"
+	//std::vector<Double_t> Q = {20,30,40,50,60,70,80,90,100,110,120,130,140};
+	//gain_cali(gain_cali_dictionary, Q);
+	
 	// get calibration spectrum
 	// raw_data_read_1v0(gain_cali_dictionary, "ADC_code_correction", correct_cali_dictionary); // option = "ADC_code_calibration" or "ADC_code_correction"
 	// info_calculate(gain_cali_dictionary, "Q_calculate", gain_cali_dictionary); // option = "gain_cali" or "Q_calculate"
@@ -51,7 +51,7 @@ int main()
 	
 	// plot
 	// raw_data_read_1v0(plot_data_dictionary, "ADC_code_correction", correct_cali_dictionary); // option = "ADC_code_calibration" or "ADC_code_correction"
-	// wavePlot(plot_data_dictionary, "TPC_FEE_range_0_shape_7_gain_0_thre_32_chn_31_ampl_700mV_gain_cali_FE4_20250228002327_0.root", 1);
+	// wavePlot(noise_data_dictionary, "TPC_FEE_range_0_shape_7_gain_0_thre32_noise_noise_FE1234_20250304113954_0.root", 20);
 
 	std::cout << "Finish!" << std::endl;
     return 0;
