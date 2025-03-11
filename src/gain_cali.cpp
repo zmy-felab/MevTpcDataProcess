@@ -102,10 +102,18 @@ void gain_cali(std::string gain_cali_dictionary, std::vector<Double_t> Q)
             {
                 amplitude_average[i].push_back(get_average(amplitude[i]));
             }
+            
         }
     }
     delete[] event_filename;
-    
+
+	for (Int_t i = 0; i < channel_num; i++)
+	{
+		if (amplitude_average[i].size() != 0)
+		{
+			std::sort(amplitude_average[i].begin(), amplitude_average[i].end());
+		}
+	}
     
     // output gain.txt
     std::ofstream dataFile;

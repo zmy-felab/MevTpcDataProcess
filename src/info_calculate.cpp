@@ -130,7 +130,7 @@ void info_calculate(std::string test_data_dictionary, std::string Q_calculate_op
         if (pulse_entries <= 0)
         {
             std::cout << "error: Pulse_entries can not be 0!" << std::endl;
-            return;
+            continue;
         }
         std::cout << "Entries of the file :" << pulse_entries << std::endl;
 

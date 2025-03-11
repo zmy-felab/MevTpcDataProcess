@@ -159,7 +159,7 @@ void wavePlot(std::string plot_data_dictionary, std::string root_file_name, Int_
 
         for (Int_t j = 0; j < wave_length; j++)
         {
-            x_data[j] = j * 0.01;
+            x_data[j] = j * 0.1;
             y_data[j] = ADC_data[i][j];
         }
 
