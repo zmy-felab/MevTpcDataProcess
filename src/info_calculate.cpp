@@ -205,7 +205,14 @@ void info_calculate(std::string test_data_dictionary, std::string Q_calculate_op
                     ADC_data_max_index = ADC_index;
                 }
             }
-            event_data_object.strip_amplitude[event_data_object.strip_num] = ADC_data_max;
+            if (ADC_data_max >= 0 || ADC_data_max < 1024)
+            {
+                event_data_object.strip_amplitude[event_data_object.strip_num] = ADC_data_max;
+            }
+            else 
+			{
+				continue;
+			}
 
             if (Q_calculate_option == "Q_calculate")
             {

@@ -197,12 +197,15 @@ void SpectrumPlot(std::string plot_data_dictionary, std::string root_file_name) 
     Q_tree->SetBranchAddress("event_id", &spectrum_data_object.event_id);
 
     // Set up the histogram
-    TH1D* hist = new TH1D("energy_spectrum", "Energy Spectrum;Energy (ADC);Counts", 10000, 0, 1000);
+    TH1D* hist = new TH1D("energy_spectrum", "Energy Spectrum;Energy (ADC);Counts", 1000, 0, 1000);
 
     // Fill the histogram
     Long64_t nEntries = Q_tree->GetEntries();
     for (Long64_t i = 0; i < nEntries; i++) {
         Q_tree->GetEntry(i);
+		if (spectrum_data_object.Q < 100 || spectrum_data_object.Q > 1000) {
+			continue;
+		}
         hist->Fill(spectrum_data_object.Q);
     }
 
