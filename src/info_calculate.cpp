@@ -9,28 +9,29 @@ constexpr auto baseline_average_length = 10;
 // find strip_x、strip_y by FE_ID and CH_ID
 void ch_to_strip(std::vector<Int_t> czt_lookup, Int_t FE_ID, Int_t CH_ID, Int_t& strip_xy, Int_t& strip_id)
 {
-    if (FE_ID <= 7) {
+    if (FE_ID == 1 || FE_ID == 3) {
         strip_xy = 0;
     }
     else {
         strip_xy = 1;
     }
-
-    Int_t flag = 0;
-    for (Int_t i = 0; i < channel_num / 2; i++)
-    {
-        if (czt_lookup[strip_xy * channel_num / 2 + i] == CH_ID)
-        {
-            flag = 1;
-            strip_id = i;
-            break;
-        }
-    }
+	strip_id = czt_lookup[FE_ID * 64 + CH_ID];
 }
 
 // calculate event information
 void info_calculate(std::string test_data_dictionary, std::string Q_calculate_option, std::string gain_cali_dictionary)
 {   
+	Int_t FE_ID_position[16] = { 0,5,0,4,10,0,11,0,0,0,0,0,0,0,0,0 };
+    std::vector<Int_t> czt_lookup;
+    for (Int_t i = 0; i < 1024; i++) {
+        if (i % 64 < 32) {
+            czt_lookup.push_back(FE_ID_position[i / 64] * 64 + 31 - i % 64);
+        }
+		else if (i % 64 >= 32) {
+			czt_lookup.push_back(FE_ID_position[i / 64] * 64 + 95 - i % 64);
+		}    
+    }
+
     // load gain.txt
     Double_t* gain = new Double_t[channel_num];
     Double_t* intercept = new Double_t[channel_num];
@@ -86,15 +87,6 @@ void info_calculate(std::string test_data_dictionary, std::string Q_calculate_op
     // define the Intermediate variable
     std::string* root_filename = new std::string[file_num];
     std::string* event_filename = new std::string[file_num];
-	std::vector<Int_t> czt_lookup;
-	for (Int_t i = 0; i < 1024; i++) {
-		if (i < 512) {
-			czt_lookup.push_back(i);
-		}
-		else {
-			czt_lookup.push_back(i - 512);
-		}
-	}
 
     for (Int_t file_index = 0; file_index < file_num; file_index++)
     {

@@ -49,4 +49,14 @@ public:
     Double_t Q;
 };
 
+class hitmap_data
+{
+private:
+
+public:
+	Int_t event_id;
+	Int_t x;
+	Int_t y;
+};
+
 #endif
