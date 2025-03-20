@@ -182,7 +182,7 @@ void wavePlot(std::string plot_data_dictionary, std::string root_file_name, Int_
 	delete fp;
 }
 
-void SpectrumPlot(std::string plot_data_dictionary, std::string root_file_name) {
+void SpectrumPlot(std::string plot_data_dictionary, std::string root_file_name, std::string fit_option, Double_t fitRangeLow, Double_t fitRangeHigh) {
 
     // Open the root file
 	std::string file_name = plot_data_dictionary + root_file_name;
@@ -197,46 +197,166 @@ void SpectrumPlot(std::string plot_data_dictionary, std::string root_file_name) 
     Q_tree->SetBranchAddress("event_id", &spectrum_data_object.event_id);
 
     // Set up the histogram
-    TH1D* hist = new TH1D("energy_spectrum", "Energy Spectrum;Energy (ADC);Counts", 10000, 0, 1000);
+    TH1D* hist = new TH1D("energy_spectrum", "Energy Spectrum;Energy (ADC);Counts", 500, 0, 1500);
 
     // Fill the histogram
     Long64_t nEntries = Q_tree->GetEntries();
     for (Long64_t i = 0; i < nEntries; i++) {
         Q_tree->GetEntry(i);
+		if (spectrum_data_object.Q < 10 || spectrum_data_object.Q > 1500) {
+			continue;
+		}
         hist->Fill(spectrum_data_object.Q);
     }
 
+    int maxBin;
+    double maxBinCenter;
+    double maxBinContent;
+
     // Draw the histogram
     TCanvas* canvas = new TCanvas("canvas", "Energy Spectrum", 800, 600);
+	TF1* gaussFit;
 
     // Set the axis labels and title
     hist->GetXaxis()->SetTitle("Charge/fC");
     hist->GetYaxis()->SetTitle("Counts");
     gStyle->SetOptStat(0);
 
-    // Draw the histogram and the fit
-    int maxBin = hist->GetMaximumBin();
-    double maxBinContent = hist->GetBinContent(maxBin);
-    double threshold = 0.01 * maxBinContent;
+    if (fit_option == "GaussFit") {
 
-    // Find the range for bins exceeding 1% of the maximum bin content
-    int firstBin = maxBin;
-    int lastBin = maxBin;
-    for (int bin = 1; bin <= hist->GetNbinsX(); bin++) {
-        if (hist->GetBinContent(bin) > threshold) {
-            firstBin = bin;
-            break;
+        maxBin = fitRangeLow;
+        maxBinContent = hist->GetBinContent(fitRangeLow);
+
+        for (int bin = fitRangeLow; bin <= fitRangeHigh; bin++) {
+            double binContent = hist->GetBinContent(bin);
+            if (binContent > maxBinContent) {
+                maxBin = bin;
+                maxBinContent = binContent;
+            }
         }
-    }
-    for (int bin = hist->GetNbinsX(); bin >= 1; bin--) {
-        if (hist->GetBinContent(bin) > threshold) {
-            lastBin = bin;
-            break;
+
+        double maxBinCenter = hist->GetBinCenter(maxBin);
+
+        // Create a Gaussian function for fitting
+        gaussFit = new TF1("gaussFit", "gaus", fitRangeLow, fitRangeHigh);
+        gaussFit->SetParameters(maxBinContent, maxBinCenter, hist->GetRMS());
+
+        // Perform the fit
+        hist->Fit(gaussFit, "R");
+
+        // Retrieve the fit parameters
+        Double_t amplitude = gaussFit->GetParameter(0);
+        Double_t mean = gaussFit->GetParameter(1);
+        Double_t sigma = gaussFit->GetParameter(2);
+		Double_t FWHM = 2.355 * sigma / mean;
+
+        // Draw the histogram and the fit
+        double threshold = 0.01 * maxBinContent;
+
+        // Find the range for bins exceeding 1% of the maximum bin content
+        int firstBin = maxBin;
+        int lastBin = maxBin;
+        for (int bin = 1; bin <= hist->GetNbinsX(); bin++) {
+            if (hist->GetBinContent(bin) > threshold) {
+                firstBin = bin;
+                break;
+            }
         }
+        for (int bin = hist->GetNbinsX(); bin >= 1; bin--) {
+            if (hist->GetBinContent(bin) > threshold) {
+                lastBin = bin;
+                break;
+            }
+        }
+
+        // Set the range for the histogram
+        hist->GetXaxis()->SetRange(firstBin * 0.9, lastBin * 1.1);
+        hist->Draw();
+        gaussFit->Draw("same");
+
+        // Add text for Gaussian fit results
+        TPaveText* text = new TPaveText(0.6, 0.7, 0.9, 0.9, "NDC");
+        text->AddText(("Mean: " + std::to_string(mean).substr(0, (std::to_string(mean).find('.') + 4))).c_str());
+        text->AddText(("Sigma: " + std::to_string(sigma).substr(0, (std::to_string(sigma).find('.') + 4))).c_str());
+        text->AddText(("Amplitude: " + std::to_string(amplitude).substr(0, (std::to_string(amplitude).find('.') + 4))).c_str());
+		text->AddText(("FWHM: " + std::to_string(FWHM*100).substr(0, (std::to_string(FWHM).find('.') + 4)) + "%").c_str());
+        text->Draw();
+
+        // Save the canvas as an image
+        std::string plotName = std::string(file_name).substr(0, std::string(file_name).find_last_of('.')) + "_gauss.png";
+        canvas->SaveAs(plotName.c_str());
+
     }
+    else {
+
+        maxBin = hist->GetMaximumBin();
+        maxBinCenter = hist->GetBinCenter(maxBin);
+        maxBinContent = hist->GetBinContent(maxBin);
+
+        // Draw the histogram and the fit
+        double threshold = 0.01 * maxBinContent;
+
+        // Find the range for bins exceeding 1% of the maximum bin content
+        int firstBin = maxBin;
+        int lastBin = maxBin;
+        for (int bin = 1; bin <= hist->GetNbinsX(); bin++) {
+            if (hist->GetBinContent(bin) > threshold) {
+                firstBin = bin;
+                break;
+            }
+        }
+        for (int bin = hist->GetNbinsX(); bin >= 1; bin--) {
+            if (hist->GetBinContent(bin) > threshold) {
+                lastBin = bin;
+                break;
+            }
+        }
+
+        // Set the range for the histogram
+        hist->GetXaxis()->SetRange(firstBin * 0.9, lastBin * 1.1);
+        hist->Draw();
+
+        // Save the canvas as an image
+        std::string plotName = std::string(file_name).substr(0, std::string(file_name).find_last_of('.')) + ".png";
+        canvas->SaveAs(plotName.c_str());
+
+    }
+
+    // Clean up
+    fp->Close();
+    delete fp;
+    delete canvas;
+}
+
+void NoiseDistributionPlot(std::string noise_data_dictionary, std::string root_file_name) 
+{
+	Double_t noise;
+
+    // Open the root file
+    std::string file_name = noise_data_dictionary + root_file_name;
+    TFile* fp = new TFile(file_name.c_str());
+    std::cout << file_name << " was opened successfully" << std::endl;
+
+    // Get the tree and set the branch
+    TTree* noise_tree = (TTree*)fp->Get("noise_tree");
+    noise_tree->SetBranchAddress("noise", &noise);
     
-    // Set the range for the histogram
-    hist->GetXaxis()->SetRange(firstBin * 0.9, lastBin * 1.1);
+    // Set up the histogram
+    TH1D* hist = new TH1D("noise_distribution", "Noise Distribution;Noise (ADC);Counts", 100, 0, 5);
+
+    // Fill the histogram
+    Long64_t nEntries = noise_tree->GetEntries();
+    for (Long64_t i = 0; i < nEntries; i++) {
+        noise_tree->GetEntry(i);
+        hist->Fill(noise);
+    }
+
+    // Draw the histogram
+    TCanvas* canvas = new TCanvas("canvas", "Noise Distribution", 800, 600);
+
+    // Set the axis labels and title
+    hist->GetXaxis()->SetTitle("Noise/fC");
+    hist->GetYaxis()->SetTitle("Counts");
     hist->Draw();
 
     // Save the canvas as an image
@@ -246,5 +366,93 @@ void SpectrumPlot(std::string plot_data_dictionary, std::string root_file_name) 
     // Clean up
     fp->Close();
     delete fp;
+    delete canvas;
+}
+
+void StripNumDistributionPlot(std::string event_data_dictionary, std::string event_file_name) 
+{
+	Int_t strip_num;
+
+    // Open the root file
+    std::string file_name = event_data_dictionary + event_file_name;
+    TFile* fp = new TFile(file_name.c_str());
+    std::cout << file_name << " was opened successfully" << std::endl;
+
+    // Get the tree and set the branch
+    TTree* event_tree = (TTree*)fp->Get("event_tree");
+    event_tree->SetBranchAddress("strip_num", &strip_num);
+    
+    // Set up the histogram
+    TH1D* hist = new TH1D("strip_num_distribution", "Strip Num Distribution;Strip Num;Counts", 20, 0, 20);
+
+    // Fill the histogram
+    Long64_t nEntries = event_tree->GetEntries();
+    for (Long64_t i = 0; i < nEntries; i++) {
+        event_tree->GetEntry(i);
+        hist->Fill(strip_num);
+    }
+
+    // Draw the histogram
+    TCanvas* canvas = new TCanvas("canvas", "Noise Distribution", 800, 600);
+
+    // Set the axis labels and title
+    hist->GetXaxis()->SetTitle("strip num");
+    hist->GetYaxis()->SetTitle("Counts");
+    hist->Draw();
+
+    // Save the canvas as an image
+    std::string plotName = std::string(file_name).substr(0, std::string(file_name).find_last_of('.')) + ".png";
+    canvas->SaveAs(plotName.c_str());
+
+    // Clean up
+    fp->Close();
+    delete fp;
+    delete canvas;
+}
+
+void plotXYHits(std::string fileName) {
+    // Open the ROOT file
+    TFile* file = TFile::Open(fileName.c_str());
+    if (!file || file->IsZombie()) {
+        std::cerr << "Error opening file: " << fileName << std::endl;
+        return;
+    }
+
+    // Get the event tree
+    TTree* tree = nullptr;
+    file->GetObject("hitmap_tree", tree);
+    if (!tree) {
+        std::cerr << "Error: event_tree not found in file: " << fileName << std::endl;
+        file->Close();
+        delete file;
+        return;
+    }
+
+    // Set up the histogram
+    TH2D* hist = new TH2D("xy_hits", "XY Hits;X;Y", 100, 300, 400, 100, 700, 800);
+
+    // Set up the branches
+    Int_t x, y;
+    tree->SetBranchAddress("x", &x);
+    tree->SetBranchAddress("y", &y);
+
+    // Fill the histogram
+    Long64_t nEntries = tree->GetEntries();
+    for (Long64_t i = 0; i < nEntries; ++i) {
+        tree->GetEntry(i);
+        hist->Fill(x, y);
+    }
+
+    // Draw the histogram
+    TCanvas* canvas = new TCanvas("canvas", "XY Hits", 800, 600);
+    hist->Draw("COLZ");
+
+    // Save the canvas as an image
+    std::string plotName = std::string(fileName).substr(0, std::string(fileName).find_last_of('.')) + "_xy_hits.png";
+    canvas->SaveAs(plotName.c_str());
+
+    // Clean up
+    file->Close();
+    delete file;
     delete canvas;
 }

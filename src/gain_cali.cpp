@@ -80,11 +80,15 @@ void gain_cali(std::string gain_cali_dictionary, std::vector<Double_t> Q)
 
             // Push every amplitude of one channel with the input signal of fixed amplitude in amplitude[]
             for (Int_t i = 0; i < event_data_object.strip_num; i++)
-            {
+            {   
+				if (event_data_object.FE_ID[i] >= 16 || event_data_object.CH_ID[i] >= 64)
+				{
+					continue;
+				}
                 amplitude[event_data_object.FE_ID[i] * 64 + event_data_object.CH_ID[i]].push_back(event_data_object.strip_amplitude[i]);
             }
 
-            if (event_id >= 1293)
+            if (event_id >= 107)
             {
                 continue;
             }
@@ -100,7 +104,15 @@ void gain_cali(std::string gain_cali_dictionary, std::vector<Double_t> Q)
         {
             if (amplitude[i].size() != 0) 
             {
-                amplitude_average[i].push_back(get_average(amplitude[i]));
+                if (get_average(amplitude[i]) < 1024)
+                {
+                    amplitude_average[i].push_back(get_average(amplitude[i]));
+                }
+                else
+                {
+                    continue;
+                }
+                
             }
             
         }

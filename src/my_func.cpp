@@ -4,7 +4,7 @@
 std::vector<std::string> get_file_names(const std::string& directory) {
     std::vector<std::string> file_names;
     for (const auto& entry : std::filesystem::directory_iterator(directory)) {
-        if (entry.is_regular_file()) {
+        if (entry.is_regular_file() && entry.path().extension() == ".root") {
             file_names.push_back(entry.path().filename().string());
         }
     }
